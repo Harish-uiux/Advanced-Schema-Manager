@@ -17,32 +17,32 @@ class SchemaFields {
     }
     
     private function render_field($field_key, $field, $value) {
-        $field_name = "asm_schema_data[{$field_key}]";
-        $field_id = "asm_schema_data_{$field_key}";
-        
-        echo '<div class="field-group">';
-        echo '<label for="' . $field_id . '">' . $field['label'];
-        if (!empty($field['required'])) {
-            echo ' <span class="required">*</span>';
-        }
-        echo '</label>';
-        
-        switch ($field['type']) {
-            case 'text':
-                echo '<input type="text" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="regular-text"';
-                if (!empty($field['placeholder'])) {
-                    echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
-                }
-                echo '>';
-                break;
-                
-            case 'textarea':
-                echo '<textarea id="' . $field_id . '" name="' . $field_name . '" rows="4" class="large-text"';
-                if (!empty($field['placeholder'])) {
-                    echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
-                }
-                echo '>' . esc_textarea($value) . '</textarea>';
-                break;
+        $field_name = "asm_schema_data[" . esc_attr($field_key) . "]";
+    $field_id = "asm_schema_data_" . esc_attr($field_key);
+    
+    echo '<div class="field-group">';
+    echo '<label for="' . esc_attr($field_id) . '">' . esc_html($field['label']);
+    if (!empty($field['required'])) {
+        echo ' <span class="required">*</span>';
+    }
+    echo '</label>';
+    
+    switch ($field['type']) {
+        case 'text':
+            echo '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_name) . '" value="' . esc_attr($value) . '" class="regular-text"';
+            if (!empty($field['placeholder'])) {
+                echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            }
+            echo '>';
+            break;
+            
+        case 'textarea':
+            echo '<textarea id="' . esc_attr($field_id) . '" name="' . esc_attr($field_name) . '" rows="4" class="large-text"';
+            if (!empty($field['placeholder'])) {
+                echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            }
+            echo '>' . esc_textarea($value) . '</textarea>';
+            break;
                 
             case 'select':
                 echo '<select id="' . $field_id . '" name="' . $field_name . '">';
@@ -83,12 +83,97 @@ class SchemaFields {
         }
         
         if (!empty($field['description'])) {
-            echo '<p class="description">' . esc_html($field['description']) . '</p>';
-        }
+        echo '<p class="description">' . wp_kses_post($field['description']) . '</p>';
+    }
         
         echo '</div>';
     }
     
+
+    public function render_multiple_schema_fields($schema_type, $index, $data) {
+    $fields = $this->get_schema_fields($schema_type);
+    
+    if (empty($fields)) {
+        echo '<p>No fields available for this schema type.</p>';
+        return;
+    }
+    
+    foreach ($fields as $field_key => $field) {
+        $value = isset($data[$field_key]) ? $data[$field_key] : '';
+        $this->render_multiple_field($field_key, $field, $value, $index);
+    }
+}
+
+private function render_multiple_field($field_key, $field, $value, $index) {
+    $field_name = "asm_multiple_schemas[{$index}][data][{$field_key}]";
+    $field_id = "asm_multiple_schemas_{$index}_{$field_key}";
+    
+    echo '<div class="field-group">';
+    echo '<label for="' . $field_id . '">' . $field['label'];
+    if (!empty($field['required'])) {
+        echo ' <span class="required">*</span>';
+    }
+    echo '</label>';
+    
+    switch ($field['type']) {
+        case 'text':
+            echo '<input type="text" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="regular-text"';
+            if (!empty($field['placeholder'])) {
+                echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            }
+            echo '>';
+            break;
+            
+        case 'textarea':
+            echo '<textarea id="' . $field_id . '" name="' . $field_name . '" rows="4" class="large-text"';
+            if (!empty($field['placeholder'])) {
+                echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            }
+            echo '>' . esc_textarea($value) . '</textarea>';
+            break;
+            
+        case 'select':
+            echo '<select id="' . $field_id . '" name="' . $field_name . '">';
+            echo '<option value="">Select...</option>';
+            if (!empty($field['options'])) {
+                foreach ($field['options'] as $option_value => $option_label) {
+                    echo '<option value="' . esc_attr($option_value) . '"' . selected($value, $option_value, false) . '>' . esc_html($option_label) . '</option>';
+                }
+            }
+            echo '</select>';
+            break;
+            
+        case 'url':
+            echo '<input type="url" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="regular-text"';
+            if (!empty($field['placeholder'])) {
+                echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            }
+            echo '>';
+            break;
+            
+        case 'number':
+            echo '<input type="number" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="small-text"';
+            if (!empty($field['min'])) {
+                echo ' min="' . esc_attr($field['min']) . '"';
+            }
+            if (!empty($field['max'])) {
+                echo ' max="' . esc_attr($field['max']) . '"';
+            }
+            if (!empty($field['step'])) {
+                echo ' step="' . esc_attr($field['step']) . '"';
+            }
+            echo '>';
+            break;
+    }
+    
+    if (!empty($field['description'])) {
+        echo '<p class="description">' . esc_html($field['description']) . '</p>';
+    }
+    
+    echo '</div>';
+}
+
+
     private function render_repeater_field($field_key, $field, $values) {
         $field_name = "asm_schema_data[{$field_key}]";
         

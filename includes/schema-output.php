@@ -2,39 +2,74 @@
 
 class SchemaOutput {
     
-    public function output_schema($post_id) {
-        $enable_custom = get_post_meta($post_id, '_asm_enable_custom', true);
-        
-        if (!$enable_custom) {
-            // Let Yoast handle schema
-            return;
-        }
-        
-        // Remove Yoast schema output when custom is enabled
-        add_filter('wpseo_json_ld_output', '__return_false');
-        
-        $schema_type = get_post_meta($post_id, '_asm_schema_type', true);
-        $schema_data = get_post_meta($post_id, '_asm_schema_data', true);
-        $custom_schema = get_post_meta($post_id, '_asm_custom_schema', true);
-        
-        if (!empty($custom_schema)) {
-            // Validate and output custom JSON-LD
-            $decoded = json_decode($custom_schema, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                echo '<script type="application/ld+json">';
-                echo $custom_schema;
-                echo '</script>';
-            }
-        } else {
-            // Generate schema from fields
-            $generated_schema = $this->generate_schema($schema_type, $schema_data, $post_id);
-            if ($generated_schema) {
-                echo '<script type="application/ld+json">';
-                echo json_encode($generated_schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-                echo '</script>';
+ public function output_schema($post_id) {
+    $enable_custom = get_post_meta($post_id, '_asm_enable_custom', true);
+    
+    if (!$enable_custom) {
+        // Let Yoast handle schema
+        return;
+    }
+    
+    // Remove Yoast schema output when custom is enabled
+    add_filter('wpseo_json_ld_output', '__return_false');
+    
+    $schema_mode = get_post_meta($post_id, '_asm_schema_mode', true);
+    
+    switch ($schema_mode) {
+        case 'single':
+            $this->output_single_schema($post_id);
+            break;
+        case 'multiple':
+            $this->output_multiple_schemas($post_id);
+            break;
+        case 'custom_json':
+            $this->output_custom_json_schema($post_id);
+            break;
+    }
+}
+
+private function output_single_schema($post_id) {
+    $schema_type = get_post_meta($post_id, '_asm_schema_type', true);
+    $schema_data = get_post_meta($post_id, '_asm_schema_data', true);
+    
+    $generated_schema = $this->generate_schema($schema_type, $schema_data, $post_id);
+    if ($generated_schema) {
+        echo '<script type="application/ld+json">';
+        echo json_encode($generated_schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        echo '</script>';
+    }
+}
+
+private function output_multiple_schemas($post_id) {
+    $multiple_schemas = get_post_meta($post_id, '_asm_multiple_schemas', true);
+    
+    if (!empty($multiple_schemas)) {
+        foreach ($multiple_schemas as $schema_item) {
+            if (!empty($schema_item['type'])) {
+                $generated_schema = $this->generate_schema($schema_item['type'], $schema_item['data'], $post_id);
+                if ($generated_schema) {
+                    echo '<script type="application/ld+json">';
+                    echo json_encode($generated_schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                    echo '</script>';
+                }
             }
         }
     }
+}
+
+private function output_custom_json_schema($post_id) {
+    $custom_schema = get_post_meta($post_id, '_asm_custom_schema', true);
+    
+    if (!empty($custom_schema)) {
+        $decoded = json_decode($custom_schema, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            echo '<script type="application/ld+json">';
+            echo $custom_schema;
+            echo '</script>';
+        }
+    }
+}
+
     
     private function generate_schema($schema_type, $schema_data, $post_id) {
         $post = get_post($post_id);
