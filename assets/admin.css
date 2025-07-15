@@ -100,3 +100,254 @@
     background: #218838;
     border-color: #1e7e34;
 }
+/* Existing styles... */
+#advanced-schema-manager {
+    margin-top: 20px;
+}
+
+#advanced-schema-manager .field-group {
+    margin-bottom: 15px;
+}
+
+#advanced-schema-manager .field-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#advanced-schema-manager .required {
+    color: #d63384;
+}
+
+#advanced-schema-manager .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+#schema-fields-container {
+    border: 1px solid #ccd0d4;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+/* Toggle Switch Styles */
+.asm-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.asm-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.asm-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.asm-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.asm-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.asm-toggle-switch input:checked + .asm-toggle-slider {
+    background-color: #0073aa;
+}
+
+.asm-toggle-switch input:focus + .asm-toggle-slider {
+    box-shadow: 0 0 1px #0073aa;
+}
+
+.asm-toggle-switch input:checked + .asm-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.asm-toggle-label {
+    display: flex;
+    align-items: center;
+}
+
+.asm-toggle-text {
+    font-weight: 500;
+    color: #555;
+    min-width: 60px;
+}
+
+/* Hover effect */
+.asm-toggle-switch:hover .asm-toggle-slider {
+    background-color: #999;
+}
+
+.asm-toggle-switch input:checked:hover + .asm-toggle-slider {
+    background-color: #005a87;
+}
+
+/* Active state */
+.asm-toggle-switch input:checked + .asm-toggle-slider + .asm-toggle-label .asm-toggle-text {
+    color: #0073aa;
+    font-weight: 600;
+}
+
+/* Rest of existing styles... */
+.repeater-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.sub-field-group {
+    margin-bottom: 10px;
+}
+
+.sub-field-group label {
+    font-weight: normal;
+    font-size: 13px;
+}
+
+.add-repeater-item {
+    margin-top: 10px;
+}
+
+.remove-repeater-item {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.remove-repeater-item:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}
+
+.schema-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.schema-item h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.schema-type-select {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.remove-schema-item {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.remove-schema-item:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}
+
+#add-schema-item {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+#add-schema-item:hover {
+    background: #218838;
+    border-color: #1e7e34;
+}
+/* Add these to your existing admin.css */
+
+/* Toggle animation class */
+.asm-toggle-animating .asm-toggle-slider {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.asm-toggle-animating .asm-toggle-slider:before {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect enhancement */
+.asm-toggle-hover {
+    box-shadow: 0 0 8px rgba(0, 115, 170, 0.3) !important;
+}
+
+/* Focus enhancement */
+.asm-toggle-switch input:focus + .asm-toggle-slider {
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.2);
+    outline: none;
+}
+
+/* Disabled state */
+.asm-toggle-switch input:disabled + .asm-toggle-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Text transition */
+.asm-toggle-text {
+    transition: all 0.3s ease;
+}
+
+/* Active state enhancement */
+.asm-toggle-switch input:checked + .asm-toggle-slider + .asm-toggle-label .asm-toggle-text {
+    color: #0073aa;
+    font-weight: 600;
+    text-shadow: 0 0 1px rgba(0, 115, 170, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .asm-toggle-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .asm-toggle-switch {
+        width: 50px;
+        height: 28px;
+    }
+    
+    .asm-toggle-slider:before {
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+    }
+    
+    .asm-toggle-switch input:checked + .asm-toggle-slider:before {
+        transform: translateX(22px);
+    }
+}

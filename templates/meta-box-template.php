@@ -3,8 +3,16 @@
         <tr>
             <th><label for="asm_enable_custom">Enable Custom Schema</label></th>
             <td>
-                <input type="checkbox" id="asm_enable_custom" name="asm_enable_custom" value="1" <?php checked($enable_custom, 1); ?>>
-                <p class="description">Check to use custom schema, uncheck to use Yoast SEO default</p>
+                <div class="asm-toggle-container">
+                    <label class="asm-toggle-switch">
+                        <input type="checkbox" id="asm_enable_custom" name="asm_enable_custom" value="1" <?php checked($enable_custom, 1); ?>>
+                        <span class="asm-toggle-slider"></span>
+                    </label>
+                    <span class="asm-toggle-label">
+                        <span class="asm-toggle-text"><?php echo $enable_custom ? 'Enabled' : 'Disabled'; ?></span>
+                    </span>
+                </div>
+                <p class="description">Toggle to use custom schema, or keep disabled to use Yoast SEO default</p>
             </td>
         </tr>
         <tr id="schema-mode-row" style="<?php echo $enable_custom ? '' : 'display:none;'; ?>">
@@ -19,7 +27,7 @@
             </td>
         </tr>
         
-        <!-- Single Schema Mode -->
+        <!-- Rest of your existing template code remains the same -->
         <tr id="single-schema-row" style="<?php echo ($enable_custom && $schema_mode == 'single') ? '' : 'display:none;'; ?>">
             <th><label for="asm_schema_type">Schema Type</label></th>
             <td>

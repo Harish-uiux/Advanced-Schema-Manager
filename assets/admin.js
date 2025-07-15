@@ -1,19 +1,36 @@
 jQuery(document).ready(function ($) {
 	var schemaCounter = 0;
 
-	// Toggle custom schema fields
+	// Toggle custom schema fields with text update
 	$("#asm_enable_custom")
 		.change(function () {
-			if ($(this).is(":checked")) {
+			var isChecked = $(this).is(":checked");
+			var toggleText = $(this)
+				.closest(".asm-toggle-container")
+				.find(".asm-toggle-text");
+
+			if (isChecked) {
 				$("#schema-mode-row").show();
+				toggleText.text("Enabled");
 				toggleSchemaMode();
 			} else {
 				$(
 					"#schema-mode-row, #single-schema-row, #multiple-schemas-row, #custom-json-row, #schema-fields-row"
 				).hide();
+				toggleText.text("Disabled");
 			}
 		})
 		.trigger("change");
+
+	// Add smooth animation to toggle
+	$(".asm-toggle-switch input").change(function () {
+		var container = $(this).closest(".asm-toggle-container");
+		container.addClass("asm-toggle-animating");
+
+		setTimeout(function () {
+			container.removeClass("asm-toggle-animating");
+		}, 400);
+	});
 
 	// Toggle schema mode
 	$("#asm_schema_mode").change(function () {
@@ -147,4 +164,49 @@ jQuery(document).ready(function ($) {
 			loadMultipleSchemaFields(schemaType, container, index);
 		}
 	});
+
+	// FAQ detection mode handler
+	$(document).on("change", 'select[name*="faq_detection_mode"]', function () {
+		var mode = $(this).val();
+		var container = $(this).closest(".field-group").parent();
+
+		if (mode === "manual") {
+			container.find(".repeater-container").show();
+			container.find(".add-repeater-item").show();
+		} else {
+			container.find(".repeater-container").hide();
+			container.find(".add-repeater-item").hide();
+		}
+	});
+
+	// Initialize FAQ detection mode on page load
+	$('select[name*="faq_detection_mode"]').trigger("change");
+
+	// Add repeater functionality
+	$(document).on("click", ".add-repeater-item", function (e) {
+		e.preventDefault();
+		var button = $(this);
+		var template = button.siblings(".repeater-template").html();
+		var container = button.siblings(".repeater-container");
+		var index = container.find(".repeater-item").length;
+
+		template = template.replace(/\[INDEX\]/g, index);
+		container.append(template);
+	});
+
+	// Remove repeater item
+	$(document).on("click", ".remove-repeater-item", function (e) {
+		e.preventDefault();
+		$(this).closest(".repeater-item").remove();
+	});
+
+	// Toggle enhancement - add visual feedback
+	$(".asm-toggle-switch").hover(
+		function () {
+			$(this).find(".asm-toggle-slider").addClass("asm-toggle-hover");
+		},
+		function () {
+			$(this).find(".asm-toggle-slider").removeClass("asm-toggle-hover");
+		}
+	);
 });

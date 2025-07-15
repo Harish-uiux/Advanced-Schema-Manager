@@ -335,26 +335,39 @@ private function render_multiple_field($field_key, $field, $value, $index) {
         );
     }
     
-    private function get_faq_fields() {
-        return array(
-            'faqs' => array(
-                'type' => 'repeater',
-                'label' => 'FAQ Items',
-                'fields' => array(
-                    'question' => array(
-                        'type' => 'text',
-                        'label' => 'Question',
-                        'required' => true
-                    ),
-                    'answer' => array(
-                        'type' => 'textarea',
-                        'label' => 'Answer',
-                        'required' => true
-                    )
+ private function get_faq_fields() {
+    return array(
+        'faq_detection_mode' => array(
+            'type' => 'select',
+            'label' => 'FAQ Detection Mode',
+            'options' => array(
+                'manual' => 'Manual Entry',
+                'auto_h3' => 'Auto-detect from H3 tags',
+                'auto_accordion' => 'Auto-detect from Accordion blocks',
+                'auto_details' => 'Auto-detect from <details> tags'
+            ),
+            'description' => 'Choose how to detect FAQs on your page'
+        ),
+        'faqs' => array(
+            'type' => 'repeater',
+            'label' => 'FAQ Items',
+            'fields' => array(
+                'question' => array(
+                    'type' => 'text',
+                    'label' => 'Question',
+                    'required' => true
+                ),
+                'answer' => array(
+                    'type' => 'textarea',
+                    'label' => 'Answer',
+                    'required' => true
                 )
-            )
-        );
-    }
+            ),
+            'show_if' => 'faq_detection_mode|manual'
+        )
+    );
+}
+
     
     private function get_organization_fields() {
         return array(

@@ -168,28 +168,121 @@ private function output_custom_json_schema($post_id) {
         return $schema;
     }
     
-    private function generate_faq_schema($schema, $data, $post) {
-        $schema['name'] = $post->post_title;
-        
-        if (!empty($data['faqs'])) {
-            $mainEntity = array();
-            foreach ($data['faqs'] as $faq) {
-                if (!empty($faq['question']) && !empty($faq['answer'])) {
-                    $mainEntity[] = array(
-                        '@type' => 'Question',
-                        'name' => $faq['question'],
-                        'acceptedAnswer' => array(
-                            '@type' => 'Answer',
-                            'text' => $faq['answer']
-                        )
-                    );
-                }
-            }
-            $schema['mainEntity'] = $mainEntity;
-        }
-        
-        return $schema;
+ private function generate_faq_schema($schema, $data, $post) {
+    $schema['name'] = $post->post_title;
+    
+    $detection_mode = !empty($data['faq_detection_mode']) ? $data['faq_detection_mode'] : 'manual';
+    
+    switch ($detection_mode) {
+        case 'manual':
+            $faqs = !empty($data['faqs']) ? $data['faqs'] : array();
+            break;
+        case 'auto_h3':
+            $faqs = $this->extract_faqs_from_h3($post->post_content);
+            break;
+        case 'auto_accordion':
+            $faqs = $this->extract_faqs_from_accordion($post->post_content);
+            break;
+        case 'auto_details':
+            $faqs = $this->extract_faqs_from_details($post->post_content);
+            break;
+        default:
+            $faqs = array();
     }
+    
+    if (!empty($faqs)) {
+        $mainEntity = array();
+        foreach ($faqs as $faq) {
+            if (!empty($faq['question']) && !empty($faq['answer'])) {
+                $mainEntity[] = array(
+                    '@type' => 'Question',
+                    'name' => $faq['question'],
+                    'acceptedAnswer' => array(
+                        '@type' => 'Answer',
+                        'text' => $faq['answer']
+                    )
+                );
+            }
+        }
+        $schema['mainEntity'] = $mainEntity;
+    }
+    
+    return $schema;
+}
+
+// Extract FAQs from H3 tags pattern
+private function extract_faqs_from_h3($content) {
+    $faqs = array();
+    
+    // Pattern: <h3>Question</h3> followed by content until next h3
+    $pattern = '/<h3[^>]*>(.*?)<\/h3>\s*(.*?)(?=<h3|$)/is';
+    
+    if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $question = strip_tags($match[1]);
+            $answer = strip_tags($match[2]);
+            
+            // Only include if it looks like a question
+            if (preg_match('/\?$/', $question) && !empty($answer)) {
+                $faqs[] = array(
+                    'question' => trim($question),
+                    'answer' => trim($answer)
+                );
+            }
+        }
+    }
+    
+    return $faqs;
+}
+
+// Extract FAQs from WordPress accordion blocks
+private function extract_faqs_from_accordion($content) {
+    $faqs = array();
+    
+    // Pattern for Gutenberg accordion blocks
+    $pattern = '/<!-- wp:group[^>]*-->\s*<div[^>]*>.*?<h[0-9][^>]*>(.*?)<\/h[0-9]>.*?<p[^>]*>(.*?)<\/p>.*?<\/div>\s*<!-- \/wp:group -->/is';
+    
+    if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $question = strip_tags($match[1]);
+            $answer = strip_tags($match[2]);
+            
+            if (!empty($question) && !empty($answer)) {
+                $faqs[] = array(
+                    'question' => trim($question),
+                    'answer' => trim($answer)
+                );
+            }
+        }
+    }
+    
+    return $faqs;
+}
+
+// Extract FAQs from HTML details tags
+private function extract_faqs_from_details($content) {
+    $faqs = array();
+    
+    // Pattern: <details><summary>Question</summary>Answer</details>
+    $pattern = '/<details[^>]*>\s*<summary[^>]*>(.*?)<\/summary>\s*(.*?)\s*<\/details>/is';
+    
+    if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $question = strip_tags($match[1]);
+            $answer = strip_tags($match[2]);
+            
+            if (!empty($question) && !empty($answer)) {
+                $faqs[] = array(
+                    'question' => trim($question),
+                    'answer' => trim($answer)
+                );
+            }
+        }
+    }
+    
+    return $faqs;
+}
+
     
     private function generate_organization_schema($schema, $data, $post) {
         $schema['name'] = !empty($data['name']) ? $data['name'] : get_bloginfo('name');
