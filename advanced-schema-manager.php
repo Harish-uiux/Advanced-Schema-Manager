@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Advanced Schema Manager
- * Plugin URI: https://yourwebsite.com/advanced-schema-manager
+ * Plugin URI: https://www.boostmyshop.com/
  * Description: Add custom schema markup to pages with Yoast SEO fallback. Sanitized and secure.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com
+ * Author: Hariharan Gandhimani
+ * Author URI: https://www.boostmyshop.com/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: advanced-schema-manager
