@@ -1,0 +1,62 @@
+#advanced-schema-manager {
+    margin-top: 20px;
+}
+
+#advanced-schema-manager .field-group {
+    margin-bottom: 15px;
+}
+
+#advanced-schema-manager .field-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#advanced-schema-manager .required {
+    color: #d63384;
+}
+
+#advanced-schema-manager .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+#schema-fields-container {
+    border: 1px solid #ccd0d4;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.repeater-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.sub-field-group {
+    margin-bottom: 10px;
+}
+
+.sub-field-group label {
+    font-weight: normal;
+    font-size: 13px;
+}
+
+.add-repeater-item {
+    margin-top: 10px;
+}
+
+.remove-repeater-item {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.remove-repeater-item:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}

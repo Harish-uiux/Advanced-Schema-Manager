@@ -1,7 +1,167 @@
 <?php
+
 class SchemaFields {
     
-    public static function get_software_application_fields() {
+    public function render_schema_fields($schema_type, $data) {
+        $fields = $this->get_schema_fields($schema_type);
+        
+        if (empty($fields)) {
+            echo '<p>No fields available for this schema type.</p>';
+            return;
+        }
+        
+        foreach ($fields as $field_key => $field) {
+            $value = isset($data[$field_key]) ? $data[$field_key] : '';
+            $this->render_field($field_key, $field, $value);
+        }
+    }
+    
+    private function render_field($field_key, $field, $value) {
+        $field_name = "asm_schema_data[{$field_key}]";
+        $field_id = "asm_schema_data_{$field_key}";
+        
+        echo '<div class="field-group">';
+        echo '<label for="' . $field_id . '">' . $field['label'];
+        if (!empty($field['required'])) {
+            echo ' <span class="required">*</span>';
+        }
+        echo '</label>';
+        
+        switch ($field['type']) {
+            case 'text':
+                echo '<input type="text" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="regular-text"';
+                if (!empty($field['placeholder'])) {
+                    echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+                }
+                echo '>';
+                break;
+                
+            case 'textarea':
+                echo '<textarea id="' . $field_id . '" name="' . $field_name . '" rows="4" class="large-text"';
+                if (!empty($field['placeholder'])) {
+                    echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+                }
+                echo '>' . esc_textarea($value) . '</textarea>';
+                break;
+                
+            case 'select':
+                echo '<select id="' . $field_id . '" name="' . $field_name . '">';
+                echo '<option value="">Select...</option>';
+                if (!empty($field['options'])) {
+                    foreach ($field['options'] as $option_value => $option_label) {
+                        echo '<option value="' . esc_attr($option_value) . '"' . selected($value, $option_value, false) . '>' . esc_html($option_label) . '</option>';
+                    }
+                }
+                echo '</select>';
+                break;
+                
+            case 'number':
+                echo '<input type="number" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="small-text"';
+                if (!empty($field['min'])) {
+                    echo ' min="' . esc_attr($field['min']) . '"';
+                }
+                if (!empty($field['max'])) {
+                    echo ' max="' . esc_attr($field['max']) . '"';
+                }
+                if (!empty($field['step'])) {
+                    echo ' step="' . esc_attr($field['step']) . '"';
+                }
+                echo '>';
+                break;
+                
+            case 'url':
+                echo '<input type="url" id="' . $field_id . '" name="' . $field_name . '" value="' . esc_attr($value) . '" class="regular-text"';
+                if (!empty($field['placeholder'])) {
+                    echo ' placeholder="' . esc_attr($field['placeholder']) . '"';
+                }
+                echo '>';
+                break;
+                
+            case 'repeater':
+                $this->render_repeater_field($field_key, $field, $value);
+                break;
+        }
+        
+        if (!empty($field['description'])) {
+            echo '<p class="description">' . esc_html($field['description']) . '</p>';
+        }
+        
+        echo '</div>';
+    }
+    
+    private function render_repeater_field($field_key, $field, $values) {
+        $field_name = "asm_schema_data[{$field_key}]";
+        
+        echo '<div class="repeater-container">';
+        
+        if (is_array($values)) {
+            foreach ($values as $index => $value) {
+                $this->render_repeater_item($field_key, $field, $index, $value);
+            }
+        }
+        
+        echo '</div>';
+        echo '<button type="button" class="button add-repeater-item" data-field="' . $field_key . '">Add ' . $field['label'] . '</button>';
+        
+        // Template for new items
+        echo '<div class="repeater-template" style="display:none;">';
+        $this->render_repeater_item($field_key, $field, 'INDEX', array());
+        echo '</div>';
+    }
+    
+    private function render_repeater_item($field_key, $field, $index, $values) {
+        echo '<div class="repeater-item" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">';
+        
+        foreach ($field['fields'] as $sub_field_key => $sub_field) {
+            $sub_field_name = "asm_schema_data[{$field_key}][{$index}][{$sub_field_key}]";
+            $sub_field_id = "asm_schema_data_{$field_key}_{$index}_{$sub_field_key}";
+            $sub_value = isset($values[$sub_field_key]) ? $values[$sub_field_key] : '';
+            
+            echo '<div class="sub-field-group" style="margin-bottom: 10px;">';
+            echo '<label for="' . $sub_field_id . '">' . $sub_field['label'] . '</label>';
+            
+            switch ($sub_field['type']) {
+                case 'text':
+                    echo '<input type="text" id="' . $sub_field_id . '" name="' . $sub_field_name . '" value="' . esc_attr($sub_value) . '" class="regular-text">';
+                    break;
+                case 'textarea':
+                    echo '<textarea id="' . $sub_field_id . '" name="' . $sub_field_name . '" rows="3" class="large-text">' . esc_textarea($sub_value) . '</textarea>';
+                    break;
+                case 'url':
+                    echo '<input type="url" id="' . $sub_field_id . '" name="' . $sub_field_name . '" value="' . esc_attr($sub_value) . '" class="regular-text">';
+                    break;
+                case 'number':
+                    echo '<input type="number" id="' . $sub_field_id . '" name="' . $sub_field_name . '" value="' . esc_attr($sub_value) . '" class="small-text">';
+                    break;
+            }
+            
+            echo '</div>';
+        }
+        
+        echo '<button type="button" class="button remove-repeater-item">Remove</button>';
+        echo '</div>';
+    }
+    
+    private function get_schema_fields($schema_type) {
+        switch ($schema_type) {
+            case 'SoftwareApplication':
+                return $this->get_software_application_fields();
+            case 'Product':
+                return $this->get_product_fields();
+            case 'FAQPage':
+                return $this->get_faq_fields();
+            case 'Organization':
+                return $this->get_organization_fields();
+            case 'BreadcrumbList':
+                return $this->get_breadcrumb_fields();
+            case 'Article':
+                return $this->get_article_fields();
+            default:
+                return array();
+        }
+    }
+    
+    private function get_software_application_fields() {
         return array(
             'name' => array(
                 'type' => 'text',
@@ -50,45 +210,17 @@ class SchemaFields {
             'features' => array(
                 'type' => 'textarea',
                 'label' => 'Features (one per line)',
-                'placeholder' => 'Order tracking\nInventory management\nShipping integration'
+                'placeholder' => 'Order tracking' . "\n" . 'Inventory management' . "\n" . 'Shipping integration'
             ),
             'screenshot' => array(
                 'type' => 'url',
                 'label' => 'Screenshot URL',
                 'placeholder' => 'https://example.com/screenshot.jpg'
-            ),
-            'downloadUrl' => array(
-                'type' => 'url',
-                'label' => 'Download URL',
-                'placeholder' => 'https://example.com/download'
-            ),
-            'installUrl' => array(
-                'type' => 'url',
-                'label' => 'Install URL',
-                'placeholder' => 'https://example.com/install'
-            ),
-            'aggregateRating' => array(
-                'type' => 'group',
-                'label' => 'Aggregate Rating',
-                'fields' => array(
-                    'ratingValue' => array(
-                        'type' => 'number',
-                        'label' => 'Rating Value',
-                        'min' => 1,
-                        'max' => 5,
-                        'step' => 0.1
-                    ),
-                    'ratingCount' => array(
-                        'type' => 'number',
-                        'label' => 'Rating Count',
-                        'min' => 1
-                    )
-                )
             )
         );
     }
     
-    public static function get_product_fields() {
+    private function get_product_fields() {
         return array(
             'name' => array(
                 'type' => 'text',
@@ -105,16 +237,6 @@ class SchemaFields {
                 'label' => 'Brand',
                 'placeholder' => 'BoostMyShop'
             ),
-            'category' => array(
-                'type' => 'text',
-                'label' => 'Category',
-                'placeholder' => 'Business Software'
-            ),
-            'sku' => array(
-                'type' => 'text',
-                'label' => 'SKU',
-                'placeholder' => 'BMS-OMS-2025'
-            ),
             'price' => array(
                 'type' => 'text',
                 'label' => 'Price',
@@ -124,25 +246,11 @@ class SchemaFields {
                 'type' => 'text',
                 'label' => 'Currency',
                 'placeholder' => 'USD'
-            ),
-            'availability' => array(
-                'type' => 'select',
-                'label' => 'Availability',
-                'options' => array(
-                    'https://schema.org/InStock' => 'In Stock',
-                    'https://schema.org/OutOfStock' => 'Out of Stock',
-                    'https://schema.org/PreOrder' => 'Pre Order'
-                )
-            ),
-            'image' => array(
-                'type' => 'url',
-                'label' => 'Product Image',
-                'placeholder' => 'https://example.com/product-image.jpg'
             )
         );
     }
     
-    public static function get_faq_fields() {
+    private function get_faq_fields() {
         return array(
             'faqs' => array(
                 'type' => 'repeater',
@@ -163,7 +271,7 @@ class SchemaFields {
         );
     }
     
-    public static function get_organization_fields() {
+    private function get_organization_fields() {
         return array(
             'name' => array(
                 'type' => 'text',
@@ -184,65 +292,11 @@ class SchemaFields {
             'description' => array(
                 'type' => 'textarea',
                 'label' => 'Description'
-            ),
-            'address' => array(
-                'type' => 'group',
-                'label' => 'Address',
-                'fields' => array(
-                    'streetAddress' => array(
-                        'type' => 'text',
-                        'label' => 'Street Address'
-                    ),
-                    'addressLocality' => array(
-                        'type' => 'text',
-                        'label' => 'City'
-                    ),
-                    'addressRegion' => array(
-                        'type' => 'text',
-                        'label' => 'State/Region'
-                    ),
-                    'postalCode' => array(
-                        'type' => 'text',
-                        'label' => 'Postal Code'
-                    ),
-                    'addressCountry' => array(
-                        'type' => 'text',
-                        'label' => 'Country'
-                    )
-                )
-            ),
-            'contactPoint' => array(
-                'type' => 'group',
-                'label' => 'Contact Information',
-                'fields' => array(
-                    'telephone' => array(
-                        'type' => 'text',
-                        'label' => 'Phone Number'
-                    ),
-                    'email' => array(
-                        'type' => 'email',
-                        'label' => 'Email'
-                    ),
-                    'contactType' => array(
-                        'type' => 'select',
-                        'label' => 'Contact Type',
-                        'options' => array(
-                            'customer service' => 'Customer Service',
-                            'sales' => 'Sales',
-                            'support' => 'Support'
-                        )
-                    )
-                )
-            ),
-            'sameAs' => array(
-                'type' => 'textarea',
-                'label' => 'Social Media URLs (one per line)',
-                'placeholder' => 'https://linkedin.com/company/boostmyshop'
             )
         );
     }
     
-    public static function get_breadcrumb_fields() {
+    private function get_breadcrumb_fields() {
         return array(
             'breadcrumbs' => array(
                 'type' => 'repeater',
@@ -265,6 +319,21 @@ class SchemaFields {
                         'min' => 1
                     )
                 )
+            )
+        );
+    }
+    
+    private function get_article_fields() {
+        return array(
+            'headline' => array(
+                'type' => 'text',
+                'label' => 'Headline',
+                'required' => true
+            ),
+            'description' => array(
+                'type' => 'textarea',
+                'label' => 'Description',
+                'required' => true
             )
         );
     }

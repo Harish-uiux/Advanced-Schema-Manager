@@ -7,7 +7,7 @@
                 <p class="description">Check to use custom schema, uncheck to use Yoast SEO default</p>
             </td>
         </tr>
-        <tr id="schema-type-row">
+        <tr id="schema-type-row" style="<?php echo $enable_custom ? '' : 'display:none;'; ?>">
             <th><label for="asm_schema_type">Schema Type</label></th>
             <td>
                 <select id="asm_schema_type" name="asm_schema_type">
@@ -25,18 +25,21 @@
                 </select>
             </td>
         </tr>
-        <tr id="schema-fields-row">
+        <tr id="schema-fields-row" style="<?php echo $enable_custom ? '' : 'display:none;'; ?>">
             <th><label>Schema Fields</label></th>
             <td>
                 <div id="schema-fields-container">
-                    <!-- Dynamic fields will be loaded here -->
+                    <?php if ($schema_type) { 
+                        $schema_fields = new SchemaFields();
+                        $schema_fields->render_schema_fields($schema_type, $schema_data); 
+                    } ?>
                 </div>
             </td>
         </tr>
-        <tr>
+        <tr id="custom-schema-row" style="<?php echo $enable_custom ? '' : 'display:none;'; ?>">
             <th><label for="asm_custom_schema">Custom Schema JSON</label></th>
             <td>
-                <textarea id="asm_custom_schema" name="asm_custom_schema" rows="10" cols="50" class="large-text code"><?php echo esc_textarea($schema_data); ?></textarea>
+                <textarea id="asm_custom_schema" name="asm_custom_schema" rows="10" cols="50" class="large-text code"><?php echo esc_textarea($custom_schema); ?></textarea>
                 <p class="description">Add custom JSON-LD schema markup or use the fields above</p>
             </td>
         </tr>
